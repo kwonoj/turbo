@@ -52,6 +52,7 @@ pub struct NextDevServerBuilder {
     log_level: IssueSeverity,
     show_all: bool,
     log_detail: bool,
+    allow_retry: bool,
 }
 
 impl NextDevServerBuilder {
@@ -75,6 +76,7 @@ impl NextDevServerBuilder {
             log_level: IssueSeverity::Warning,
             show_all: false,
             log_detail: false,
+            allow_retry: false,
         }
     }
 
@@ -118,6 +120,11 @@ impl NextDevServerBuilder {
         self
     }
 
+    pub fn allow_retry(mut self, allow_retry: bool) -> NextDevServerBuilder {
+        self.allow_retry = allow_retry;
+        self
+    }
+
     pub fn log_detail(mut self, log_detail: bool) -> NextDevServerBuilder {
         self.log_detail = log_detail;
         self
@@ -157,12 +164,10 @@ impl NextDevServerBuilder {
                     server_component_externals.clone(),
                 )
             },
-            (
-                self.hostname.context("hostname must be set")?,
-                self.port.context("port must be set")?,
-            )
-                .into(),
+            self.hostname.context("hostname must be set")?,
+            self.port.context("port must be set")?,
             console_ui_to_dev_server,
+            self.allow_retry,
         );
 
         server
@@ -331,6 +336,7 @@ pub async fn start_server(options: &DevServerOptions) -> Result<()> {
         .port(options.port)
         .log_detail(options.log_detail)
         .show_all(options.show_all)
+        .allow_retry(options.allow_retry)
         .log_level(
             options
                 .log_level

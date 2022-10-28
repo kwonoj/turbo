@@ -11,8 +11,9 @@ pub mod update;
 use std::{
     borrow::Cow,
     collections::{btree_map::Entry, BTreeMap},
+    error::Error,
     future::Future,
-    net::SocketAddr,
+    net::{IpAddr, SocketAddr},
     pin::Pin,
     sync::{
         atomic::{AtomicU64, Ordering},
@@ -21,7 +22,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use anyhow::{bail, Context, Result};
+use anyhow::{bail, Result};
 use futures::{StreamExt, TryStreamExt};
 use hyper::{
     header::HeaderName,
@@ -170,8 +171,10 @@ impl DevServer {
     pub fn listen(
         turbo_tasks: Arc<dyn TurboTasksApi>,
         source_provider: impl SourceProvider + Clone + Send + Sync,
-        addr: SocketAddr,
+        host: IpAddr,
+        port: u16,
         console_ui: Arc<ConsoleUi>,
+        allow_retry: bool,
     ) -> Result<Self, anyhow::Error> {
         let make_svc = make_service_fn(move |_| {
             let tt = turbo_tasks.clone();
@@ -266,17 +269,48 @@ impl DevServer {
                 anyhow::Ok(service_fn(handler))
             }
         });
-        let server = Server::try_bind(&addr)
-            .context("Not able to start server")?
-            .serve(make_svc);
 
-        Ok(Self {
-            addr: server.local_addr(),
-            future: Box::pin(async move {
-                server.await?;
-                Ok(())
-            }),
-        })
+        let mut err: Option<hyper::Error> = None;
+
+        for retry_count in 0..10 {
+            let addr = SocketAddr::new(host, port + retry_count);
+            let bind_result = Server::try_bind(&addr);
+
+            match bind_result {
+                Ok(builder) => {
+                    let server = builder.serve(make_svc);
+
+                    return Ok(Self {
+                        addr: server.local_addr(),
+                        future: Box::pin(async move {
+                            server.await?;
+                            Ok(())
+                        }),
+                    });
+                }
+                Err(e) => {
+                    let should_retry = if allow_retry {
+                        e.source()
+                            .map(|e| {
+                                e.downcast_ref::<std::io::Error>()
+                                    .map(|e| e.kind() == std::io::ErrorKind::AddrInUse)
+                                    == Some(true)
+                            })
+                            .unwrap_or_else(|| false)
+                    } else {
+                        false
+                    };
+
+                    if !should_retry {
+                        return Err(e.into());
+                    }
+
+                    err = Some(e);
+                }
+            }
+        }
+
+        Err(err.expect("Should exists").into())
     }
 }
 
