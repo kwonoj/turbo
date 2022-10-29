@@ -273,7 +273,8 @@ impl DevServer {
         let mut err: Option<hyper::Error> = None;
 
         for retry_count in 0..10 {
-            let addr = SocketAddr::new(host, port + retry_count);
+            let current_port = port + retry_count;
+            let addr = SocketAddr::new(host, current_port);
             let bind_result = Server::try_bind(&addr);
 
             match bind_result {
@@ -303,6 +304,13 @@ impl DevServer {
 
                     if !should_retry {
                         return Err(e.into());
+                    } else {
+                        println!(
+                            "{} - Port {} is in use, trying {} instead",
+                            "warn ".yellow(),
+                            current_port,
+                            current_port + 1
+                        );
                     }
 
                     err = Some(e);
