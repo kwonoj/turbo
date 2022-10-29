@@ -28,6 +28,11 @@ tokio_console = [
   "turbo-tasks/tokio_tracing",
 ]
 
+# Internal feature for the version alignment.
+__internal_swc_core = [
+  "swc_core"
+]
+
 [dependencies]
 anyhow = "1.0.47"
 clap = { version = "3", features = ["derive"] }
@@ -49,6 +54,7 @@ turbopack-core = { path = "../turbopack-core" }
 turbopack-dev-server = { path = "../turbopack-dev-server" }
 url = "2.3.0"
 webbrowser = "0.7.1"
+swc_core = { optional = true, workspace = true }
 
 [dev-dependencies]
 chromiumoxide = { version = "0.3.5", features = [
