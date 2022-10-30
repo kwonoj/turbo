@@ -69,14 +69,12 @@ jobs:
       - name: Install cargo clippy diff
         run: |
           rustup component add clippy
-          cargo install cargo-diff-tools
+          cargo install cargo-scout
 
       - name: Run cargo clippy diff
+        if: github.ref != 'refs/heads/main'
         run: |
-          echo $GITHUB_BASE_REF
-          echo $GITHUB_HEAD_REF
-          git merge-base $GITHUB_BASE_REF $GITHUB_HEAD_REF
-          cargo-clippy-diff $(git merge-base $GITHUB_BASE_REF $GITHUB_HEAD_REF) $GITHUB_HEAD_REF -- --all-features
+          cargo-scout lint
 
       - name: Cache
         id: clippy-diff-cache
