@@ -55,6 +55,38 @@ jobs:
           command: check
           args: --benches
 
+  clippy-diff:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: Swatinem/rust-cache@v1
+        with:
+          key: clippy
+
+      - name: Install cargo clippy diff
+        run: |
+          rustup component add clippy
+          cargo install cargo-diff-tools
+
+      - name: Run cargo clippy diff
+        run: |
+          echo $GITHUB_BASE_REF
+          echo $GITHUB_HEAD_REF
+          git merge-base $GITHUB_BASE_REF $GITHUB_HEAD_REF
+          cargo-clippy-diff $(git merge-base $GITHUB_BASE_REF $GITHUB_HEAD_REF) $GITHUB_HEAD_REF -- --all-features
+
+      - name: Cache
+        id: clippy-diff-cache
+        uses: actions/cache@v3
+        with:
+          path: clippy-diff-cache
+          key: clippy-diff-cache-${{ github.sha }}
+          restore-keys: |
+            clippy-diff-cache
+
   clippy:
     runs-on: ubuntu-latest
 
@@ -67,7 +99,8 @@ jobs:
           key: clippy
 
       - name: Install cargo clippy
-        run: rustup component add clippy
+        run: |
+          rustup component add clippy
 
       - name: Run cargo clippy
         uses: actions-rs/cargo@v1
