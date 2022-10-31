@@ -532,8 +532,12 @@ impl FileSystem for DiskFileSystem {
         }
         let file_type = &*fs_path.get_type().await?;
         let create_directory = file_type == &FileSystemEntryType::NotFound;
+        println!("write_link create_directory: {:#?}", create_directory);
         if create_directory {
+            println!("in create_directory full_path: {:#?}", full_path);
             if let Some(parent) = full_path.parent() {
+                println!("in create_directory parent_path: {:#?}", parent);
+
                 retry_future(move || fs::create_dir_all(parent))
                     .await
                     .with_context(|| {
@@ -543,17 +547,21 @@ impl FileSystem for DiskFileSystem {
                             full_path.display()
                         )
                     })?;
+
+                let x = Path::exists(parent);
+                println!("in create_directory parent_path exists: {:#?}", x);
             }
         }
         match &*target_link {
             LinkContent::Link { target, link_type } => {
+                let p = full_path.clone();
                 let link_type = *link_type;
                 let target_path = if link_type.contains(LinkType::ABSOLUTE) {
                     Path::new(&self.root).join(unix_to_sys(target).as_ref())
                 } else {
                     PathBuf::from(unix_to_sys(target).as_ref())
                 };
-                retry_blocking(&target_path, move |target_path| {
+                let ret = retry_blocking(&target_path, move |target_path| {
                     // we use the sync std method here because `symlink` is fast
                     // if we put it into a task, it will be slower
                     #[cfg(not(target_family = "windows"))]
@@ -569,8 +577,21 @@ impl FileSystem for DiskFileSystem {
                         }
                     }
                 })
-                .await
-                .with_context(|| format!("create symlink to {}", target))?;
+                .await;
+
+                if let Err(e) = &ret {
+                    println!("----------------------------------------------");
+                    println!("Failed to create symlink");
+                    println!("file_type {:#?}", file_type);
+                    println!("target {:#?}", target);
+                    println!("target_path {:#?}", target_path);
+                    println!("root {:#?}", self.root);
+                    println!("full_path {:#?}", &p);
+                    println!("link type {:#?}", link_type);
+                    println!("{:#?}", e);
+                }
+
+                ret.with_context(|| format!("create symlink to {}", target))?;
             }
             LinkContent::Invalid => {
                 return Err(anyhow!("invalid symlink target: {}", full_path.display()));

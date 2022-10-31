@@ -281,9 +281,15 @@ async fn input_to_modules<'a>(
 }
 
 fn process_context(dir: &Path, context_directory: Option<&String>) -> Result<String> {
+    println!("process_context {:#?} {:#?}", dir, context_directory);
     let mut context = PathBuf::from(context_directory.map_or(".", |s| s));
     if !context.is_absolute() {
+        println!(
+            "process_context: no_is_absolute, join {:#?} {:#?}",
+            dir, context
+        );
         context = dir.join(context);
+        println!("process_context: no_is_absolute, {:#?}", context);
     }
     // context = context.canonicalize().unwrap();
     Ok(context
