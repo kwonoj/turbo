@@ -27,7 +27,9 @@ use rstest_reuse::{self, *};
 use serde::{Deserialize, Serialize};
 use tokio::{process::Command, time::timeout};
 use turbo_tasks::{backend::Backend, TurboTasks, Value, ValueToString};
-use turbo_tasks_fs::{DiskFileSystemVc, FileSystem, FileSystemPathVc, FileSystemVc};
+use turbo_tasks_fs::{
+    util::unix_to_sys, DiskFileSystemVc, FileSystem, FileSystemPathVc, FileSystemVc,
+};
 use turbo_tasks_memory::MemoryBackend;
 use turbopack::{
     emit_with_completion, rebase::RebasedAssetVc, register,
@@ -356,8 +358,10 @@ fn node_file_trace<B: Backend + 'static>(
         tests_output_root.push("tests_output");
         let package_root = package_root.to_string_lossy().to_string();
         let input = format!("node-file-trace/{input_path}");
-        let directory_path = tests_output_root.join(&format!("{mode}_{input}"));
-        let directory = directory_path.to_string_lossy().to_string();
+        let output = tests_output_root.join(&format!("{mode}_{input}"));
+        let output = output.to_string_lossy();
+        let directory_path = unix_to_sys(&output);
+        let directory = directory_path.as_ref().to_string();
 
         remove_dir_all(&directory)
             .or_else(|err| {
@@ -482,7 +486,7 @@ fn node_file_trace<B: Backend + 'static>(
                 }
             };
 
-            let tt = create_turbo_tasks(directory_path.as_path());
+            let tt = create_turbo_tasks(Path::new(directory_path.as_ref()));
             let output = timeout(Duration::from_secs(timeout_len), tt.run_once(task)).await;
             let _ = timeout(Duration::from_secs(2), tt.wait_background_done()).await;
             let stop = timeout(Duration::from_secs(60), tt.stop_and_wait()).await;
@@ -544,6 +548,9 @@ async fn exec_node(directory: String, path: FileSystemPathVc) -> Result<CommandO
 
     let p = path.await?;
     let f = Path::new(&directory).join(&p.path);
+    let f = f.to_string_lossy();
+    let f = unix_to_sys(&f);
+    let f = Path::new(f.as_ref());
     let dir = f.parent().unwrap();
     println!("[CWD]: {}", dir.display());
     let label = path.to_string().await?;
