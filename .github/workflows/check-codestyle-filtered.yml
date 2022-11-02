@@ -55,6 +55,12 @@ jobs:
           command: check
           args: --benches
 
+      - name: Run cargo bloat
+        uses: orf/cargo-bloat-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          exclude_packages: "next-core node-file-trace swc-ast-explorer turbo-malloc turbo-tasks-build turbo-tasks-env turbo-tasks-fs turbo-tasks-hash turbo-tasks-macros turbo-tasks-macros-shared turbo-tasks-memory turbo-tasks-testing turbo-tasks turbopack-cli-utils turbopack-core turbopack-create-test-app turbopack-css turbopack-dev-server turbopack-ecmascript turbopack-env turbopack-json turbopack-static turbopack-swc-utils turbopack turbopack-tests xtask"
+
   clippy:
     runs-on: ubuntu-latest
 
