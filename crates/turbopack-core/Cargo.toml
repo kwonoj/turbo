@@ -12,7 +12,7 @@ bench = false
 [dependencies]
 anyhow = "1.0.47"
 async-trait = "0.1.56"
-browserslist-rs = "=0.11.0"                                               # Keep consistent with preset_env_base through swc_core
+browserslist-rs = { git = "https://github.com/kwonoj/browserslist-rs", rev = "4aa7ea0c84d0323a35f867311eaeea5156459f40" }
 futures = "0.3.24"
 indexmap = { workspace = true }
 lazy_static = "1.4.0"
