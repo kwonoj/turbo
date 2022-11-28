@@ -76,6 +76,9 @@ jobs:
             rust-toolchain
             !**.md
             !**.mdx
+            # TEMPTODO
+            .github/actions/**
+            .github/workflows/test.yml
 
       - name: Rust Benchmark related changes
         id: rust_bench
@@ -811,11 +814,12 @@ jobs:
         node: [16, 18]
         group: [1, 2]
     env:
-      # Enabling backtract will makes snapshot tests fail
+      # Enabling backtrace will makes snapshot tests fail
       RUST_BACKTRACE: 0
       NEXT_TELEMETRY_DISABLED: 1
       NEXT_TEST_JOB: 1
       __INTERNAL_CUSTOM_TURBOPACK_BINARY: ${{ github.workspace }}/artifacts/release-x86_64-unknown-linux-musl/next-dev
+      __INTERNAL_NEXT_DEV_TEST_TURBO_GLOB_MATCH: test/development/acceptance/ReactRefresh.test.ts
 
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
