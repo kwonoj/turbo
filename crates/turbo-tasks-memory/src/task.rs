@@ -572,11 +572,11 @@ impl Task {
                     let event = event.take();
                     let mut dependencies = take(&mut dependencies);
                     // This will stay here for longer, so make sure to not consume too much memory
-                    dependencies.shrink_to_fit();
+                    //dependencies.shrink_to_fit();
                     for cells in state.cells.values_mut() {
                         cells.shrink_to_fit();
                     }
-                    state.cells.shrink_to_fit();
+                    //state.cells.shrink_to_fit();
                     state.state_type = Done { dependencies };
                     for scope in state.scopes.iter() {
                         backend.with_scope(scope, |scope| {
