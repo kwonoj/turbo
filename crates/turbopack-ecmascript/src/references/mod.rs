@@ -164,7 +164,7 @@ impl Default for AnalyzeEcmascriptModuleResultBuilder {
 }
 
 #[turbo_tasks::function]
-pub(crate) async fn analyze_ecmascript_module(
+pub async fn analyze_ecmascript_module(
     source: AssetVc,
     origin: ResolveOriginVc,
     ty: Value<EcmascriptModuleAssetType>,

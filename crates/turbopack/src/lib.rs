@@ -55,6 +55,7 @@ pub mod transition;
 pub use turbopack_css as css;
 pub use turbopack_ecmascript as ecmascript;
 use turbopack_json::JsonModuleAssetVc;
+use turbopack_mdx::MdxModuleAssetVc;
 use turbopack_static::StaticModuleAssetVc;
 
 use self::{
@@ -200,6 +201,9 @@ async fn module(source: AssetVc, context: ModuleAssetContextVc) -> Result<AssetV
             ModuleCssModuleAssetVc::new(source, context.into(), *transforms).into()
         }
         ModuleType::Static => StaticModuleAssetVc::new(source, context.into()).into(),
+        ModuleType::Mdx(transforms) => {
+            MdxModuleAssetVc::new(source, context.into(), *transforms).into()
+        }
         ModuleType::Custom(_) => todo!(),
     })
 }
@@ -563,6 +567,7 @@ pub fn register() {
     turbopack_css::register();
     turbopack_ecmascript::register();
     turbopack_env::register();
+    turbopack_mdx::register();
     turbopack_json::register();
     turbopack_static::register();
     include!(concat!(env!("OUT_DIR"), "/register.rs"));

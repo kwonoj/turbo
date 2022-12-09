@@ -189,6 +189,13 @@ impl EcmascriptInputTransform {
 
                 program.visit_mut_with(&mut next_font);
             }
+            /*EcmascriptInputTransform::Mdx => {
+                [TODOMdx]
+                // in case of mdx, most of processings are pre-process
+                // that converts mdx into SWC's AST, then rest of
+                // transforms should be existing EcmascriptInputTransform.
+                // Do we even need this?
+            }*/
             EcmascriptInputTransform::Custom => todo!(),
         }
         Ok(())

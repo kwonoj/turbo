@@ -99,6 +99,7 @@ pub enum ModuleType {
     TypescriptDeclaration(EcmascriptInputTransformsVc),
     Json,
     Raw,
+    Mdx(EcmascriptInputTransformsVc),
     Css(CssInputTransformsVc),
     CssModule(CssInputTransformsVc),
     Static,

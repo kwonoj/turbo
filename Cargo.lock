@@ -2973,8 +2973,7 @@ dependencies = [
 [[package]]
 name = "mdxjs"
 version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c4bbd566f0dd80e0701ef5ca305e4404805eb37b95a6246ac1605acb71a6e9b"
+source = "git+https://github.com/kwonoj/mdxjs-rs?rev=3536b8648e118047f916b20c0e968ac15d8c1e76#3536b8648e118047f916b20c0e968ac15d8c1e76"
 dependencies = [
  "markdown",
  "serde",
@@ -7102,6 +7101,7 @@ dependencies = [
  "turbopack-ecmascript",
  "turbopack-env",
  "turbopack-json",
+ "turbopack-mdx",
  "turbopack-static",
 ]
 
@@ -7266,6 +7266,23 @@ dependencies = [
  "turbo-tasks-fs",
  "turbopack-core",
  "turbopack-ecmascript",
+]
+
+[[package]]
+name = "turbopack-mdx"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "mdxjs",
+ "serde",
+ "serde_json",
+ "swc_core 0.45.4",
+ "turbo-tasks",
+ "turbo-tasks-build",
+ "turbo-tasks-fs",
+ "turbopack-core",
+ "turbopack-ecmascript",
+ "turbopack-swc-utils",
 ]
 
 [[package]]

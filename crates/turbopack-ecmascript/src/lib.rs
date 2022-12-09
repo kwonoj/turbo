@@ -27,9 +27,12 @@ use chunk::{
     EcmascriptChunkItem, EcmascriptChunkItemVc, EcmascriptChunkPlaceablesVc, EcmascriptChunkVc,
 };
 use code_gen::CodeGenerateableVc;
+pub use parse::hash_file_path;
 use parse::{parse, ParseResult, ParseResultSourceMap};
-use path_visitor::ApplyVisitors;
-use references::AnalyzeEcmascriptModuleResult;
+pub use path_visitor::ApplyVisitors;
+pub use references::{
+    analyze_ecmascript_module, AnalyzeEcmascriptModuleResult, AnalyzeEcmascriptModuleResultVc,
+};
 use swc_core::{
     common::GLOBALS,
     ecma::{
@@ -37,7 +40,7 @@ use swc_core::{
         visit::{VisitMutWith, VisitMutWithPath},
     },
 };
-pub use transform::{EcmascriptInputTransform, EcmascriptInputTransformsVc};
+pub use transform::{EcmascriptInputTransform, EcmascriptInputTransformsVc, TransformContext};
 use turbo_tasks::{primitives::StringVc, TryJoinIterExt, Value, ValueToString, ValueToStringVc};
 use turbo_tasks_fs::FileSystemPathVc;
 use turbopack_core::{
@@ -49,17 +52,11 @@ use turbopack_core::{
     resolve::origin::{ResolveOrigin, ResolveOriginVc},
 };
 
-use self::{
-    chunk::{
-        EcmascriptChunkItemContent, EcmascriptChunkItemContentVc, EcmascriptChunkItemOptions,
-        EcmascriptExportsVc,
-    },
-    references::AnalyzeEcmascriptModuleResultVc,
+use self::chunk::{
+    EcmascriptChunkItemContent, EcmascriptChunkItemContentVc, EcmascriptChunkItemOptions,
+    EcmascriptExportsVc,
 };
-use crate::{
-    chunk::{EcmascriptChunkPlaceable, EcmascriptChunkPlaceableVc},
-    references::analyze_ecmascript_module,
-};
+use crate::chunk::{EcmascriptChunkPlaceable, EcmascriptChunkPlaceableVc};
 
 #[turbo_tasks::value(serialization = "auto_for_input")]
 #[derive(PartialOrd, Ord, Hash, Debug, Copy, Clone)]

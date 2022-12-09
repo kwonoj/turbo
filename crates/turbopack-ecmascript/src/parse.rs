@@ -297,7 +297,7 @@ async fn parse_content(
 }
 
 #[turbo_tasks::function]
-async fn hash_file_path(file_path_vc: FileSystemPathVc) -> Result<U64Vc> {
+pub async fn hash_file_path(file_path_vc: FileSystemPathVc) -> Result<U64Vc> {
     let file_path = &*file_path_vc.await?;
     let mut hasher = Xxh3Hash64Hasher::new();
     hasher.write_bytes(file_path.file_name().as_bytes());
