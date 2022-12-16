@@ -1,8 +1,9 @@
 use turbo_tasks_build::generate_register;
 
-#[cfg(any(feature = "native-tls", feature = "rustls-tls"))]
+#[cfg(feature = "native-tls")]
 fn check_tls_config() {
     // do nothing
+    panic!("boo")
 }
 #[cfg(not(any(feature = "native-tls", feature = "rustls-tls")))]
 fn check_tls_config() {
